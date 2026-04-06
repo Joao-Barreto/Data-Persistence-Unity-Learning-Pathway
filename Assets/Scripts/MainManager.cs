@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -11,6 +9,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text NameAndTopScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -18,7 +17,6 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
     // Start is called before the first frame update
     void Start()
     {
@@ -35,6 +33,10 @@ public class MainManager : MonoBehaviour
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
             }
+        }
+        if (DataManager.Instance != null)
+        {
+            NameAndTopScoreText.text = $"Sessio High Score: {DataManager.Instance.TopScore} Name: {DataManager.Instance.Name}";
         }
     }
 
@@ -60,6 +62,11 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape)) 
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 
     void AddPoint(int point)
@@ -72,5 +79,15 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if (DataManager.Instance != null) 
+        {
+            if (m_Points > DataManager.Instance.TopScore)
+            {
+                DataManager.Instance.TopScore = m_Points;
+                DataManager.Instance.SaveTopScore();
+                NameAndTopScoreText.text = $"Session High Score: {DataManager.Instance.TopScore} Name: {DataManager.Instance.Name}";
+            }
+            DataManager.Instance.SaveHighScores(DataManager.Instance.Name, m_Points);
+        }
     }
 }
